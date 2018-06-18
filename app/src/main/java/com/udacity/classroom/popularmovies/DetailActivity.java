@@ -1,45 +1,58 @@
 package com.udacity.classroom.popularmovies;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.util.Pair;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+import com.udacity.classroom.popularmovies.adapter.VideoAdapter;
+import com.udacity.classroom.popularmovies.databinding.MovieDetailBinding;
 import com.udacity.classroom.popularmovies.model.Movie;
+import com.udacity.classroom.popularmovies.utilities.MovieJsonUtils;
 import com.udacity.classroom.popularmovies.utilities.NetworkUtils;
 
-public class DetailActivity extends AppCompatActivity {
+import java.util.List;
+
+public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
     public static final String EXTRA_MESSAGE = DetailActivity.class.getSimpleName();
     private static final String BACKDROP_SIZE = "w780";
     private static final String POSTER_SIZE = "w185";
+    private static final String DETAIL_VIDEOS = "videos";
+    private static final String DETAIL_REVIEWS = "reviews";
+    private static final int VIDEO_LOADER_ID = 35;
+    private static final int REVIEW_LOADER_ID = 56;
+    private Movie mMovie;
+    List<Pair<String, String>> mVideoData;
+    List<Pair<String, String>> mReviewData;
+    MovieDetailBinding mDetailBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.movie_detail);
+        mDetailBinding = DataBindingUtil.setContentView(this, R.layout.movie_detail);
 
         Intent intent = getIntent();
+
         if (intent == null) {
             finish();
-            Toast.makeText(this, "Movie data not available.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.unavailable_message, Toast.LENGTH_SHORT).show();
+        } else {
+            mMovie = intent.getExtras().getParcelable(EXTRA_MESSAGE);
+            getSupportLoaderManager().initLoader(VIDEO_LOADER_ID, null, this);
+            getSupportLoaderManager().initLoader(REVIEW_LOADER_ID, null, this);
+            populateUI(mMovie);
         }
-
-        Movie movie = intent.getExtras().getParcelable(EXTRA_MESSAGE);
-        populateUI(movie);
     }
 
     private void populateUI(Movie movie) {
-        ImageView backdropIv = findViewById(R.id.backdrop_iv);
-        ImageView posterIv = findViewById(R.id.poster_iv);
-        TextView titleTv = findViewById(R.id.title_tv);
-        TextView userRatingTv = findViewById(R.id.user_rating_tv);
-        TextView releaseDateTv = findViewById(R.id.release_date_tv);
-        TextView overviewTv = findViewById(R.id.overview_tv);
-
         String backdropPath = movie.getBackdrop();
         String posterPath = movie.getThumbnail();
 
@@ -50,17 +63,53 @@ public class DetailActivity extends AppCompatActivity {
                 .load(backdropUri)
                 .placeholder(R.drawable.outline_image_black_18)
                 .error(R.drawable.outline_broken_image_black_18)
-                .into(backdropIv);
+                .into(mDetailBinding.backdropIv);
         Picasso.get()
                 .load(posterUri)
                 .placeholder(R.drawable.outline_image_black_18)
                 .error(R.drawable.outline_broken_image_black_18)
-                .into(posterIv);
+                .into(mDetailBinding.posterIv);
 
         setTitle(movie.getTitle());
-        titleTv.setText(movie.getTitle());
-        userRatingTv.setText(movie.getRating() + "/10");
-        releaseDateTv.setText(movie.getRelease_date());
-        overviewTv.setText(movie.getSynopsis());
+        mDetailBinding.titleTv.setText(movie.getTitle());
+        mDetailBinding.userRatingTv.setText(movie.getRating().concat(getString(R.string.full_score)));
+        mDetailBinding.releaseDateTv.setText(movie.getRelease_date());
+        mDetailBinding.overviewTv.setText(movie.getSynopsis());
+
+    }
+
+    @NonNull
+    @Override
+    public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
+        if (id == VIDEO_LOADER_ID) {
+            return new MovieLoader(this, mMovie.getId(), DETAIL_VIDEOS);
+        }
+
+        if (id == REVIEW_LOADER_ID) {
+            return new MovieLoader(this, mMovie.getId(), DETAIL_REVIEWS);
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
+        try {
+            if (loader.getId() == VIDEO_LOADER_ID) {
+                mVideoData = MovieJsonUtils.parseDetailJson(data);
+                mDetailBinding.videoLv.setAdapter(new VideoAdapter(this, mVideoData));
+            }
+
+            if (loader.getId() == REVIEW_LOADER_ID) {
+                mReviewData = MovieJsonUtils.parseDetailJson(data);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<String> loader) {
+
     }
 }

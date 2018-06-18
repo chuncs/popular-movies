@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Movie implements Parcelable{
+    private String id;
     private String title;
     private String thumbnail;
     private String synopsis;
@@ -14,13 +15,12 @@ public class Movie implements Parcelable{
     public Movie() {
     }
 
-    public Movie(String title, String thumbnail, String synopsis, String rating, String release_date, String backdrop) {
-        this.title = title;
-        this.thumbnail = thumbnail;
-        this.synopsis = synopsis;
-        this.rating = rating;
-        this.release_date = release_date;
-        this.backdrop = backdrop;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -74,7 +74,8 @@ public class Movie implements Parcelable{
     //----------------------------------------------------------------------------------------------
     //Parcel Part
 
-    public Movie(Parcel parcel) {
+    private Movie(Parcel parcel) {
+        this.id = parcel.readString();
         this.title = parcel.readString();
         this.thumbnail = parcel.readString();
         this.synopsis = parcel.readString();
@@ -103,6 +104,7 @@ public class Movie implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(this.id);
         parcel.writeString(this.title);
         parcel.writeString(this.thumbnail);
         parcel.writeString(this.synopsis);
