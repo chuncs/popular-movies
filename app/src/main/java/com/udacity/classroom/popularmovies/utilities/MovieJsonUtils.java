@@ -1,8 +1,9 @@
 package com.udacity.classroom.popularmovies.utilities;
 
-import android.util.Pair;
+import android.net.Uri;
 
 import com.udacity.classroom.popularmovies.model.Movie;
+import com.udacity.classroom.popularmovies.model.VideoAndReview;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,20 +13,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MovieJsonUtils {
-    private final static String MOVIE_ID = "id";
-    private final static String MOVIE_TITLE = "title";
-    private final static String MOVIE_THUMBNAIL = "poster_path";
-    private final static String MOVIE_SYNOPSIS = "overview";
-    private final static String MOVIE_RATING = "vote_average";
-    private final static String MOVIE_RELEASE_DATE = "release_date";
-    private final static String JSON_RESULT = "results";
-    private final static String MOVIE_BACKDROP = "backdrop_path";
-    private final static String VIDEO_KEY = "key";
-    private final static String VIDEO_NAME = "name";
-    private final static String VIDEO_TYPE = "type";
-    private final static String VIDEO_TYPE_TRAILER = "Trailer";
-    private final static String REVIEW_AUTHOR = "author";
-    private final static String REVIEW_CONTENT = "content";
+    private static final String MOVIE_ID = "id";
+    private static final String MOVIE_TITLE = "title";
+    private static final String MOVIE_THUMBNAIL = "poster_path";
+    private static final String MOVIE_SYNOPSIS = "overview";
+    private static final String MOVIE_RATING = "vote_average";
+    private static final String MOVIE_RELEASE_DATE = "release_date";
+    private static final String JSON_RESULT = "results";
+    private static final String MOVIE_BACKDROP = "backdrop_path";
+    private static final String VIDEO_KEY = "key";
+    private static final String VIDEO_NAME = "name";
+    private static final String VIDEO_TYPE = "type";
+    private static final String VIDEO_TYPE_TRAILER = "Trailer";
+    private static final String REVIEW_AUTHOR = "author";
+    private static final String REVIEW_CONTENT = "content";
+    private static final String THUMBNAIL_SIZE = "w185";
+    private static final String BACKDROP_SIZE = "w780";
 
     public static List<Movie> parseMovieJson(String movieJsonStr) throws JSONException {
         List<Movie> parseMovieData = new ArrayList<>();
@@ -43,7 +46,8 @@ public class MovieJsonUtils {
             movieInfo.setTitle(title);
 
             String thumbnail = result.optString(MOVIE_THUMBNAIL);
-            movieInfo.setThumbnail(thumbnail);
+            Uri thumbnailUri = NetworkUtils.buildThumbnailUri(thumbnail, THUMBNAIL_SIZE);
+            movieInfo.setThumbnailUrl(thumbnailUri.toString());
 
             String synopsis = result.optString(MOVIE_SYNOPSIS);
             movieInfo.setSynopsis(synopsis);
@@ -55,7 +59,8 @@ public class MovieJsonUtils {
             movieInfo.setRelease_date(release_date);
 
             String backdrop = result.optString(MOVIE_BACKDROP);
-            movieInfo.setBackdrop(backdrop);
+            Uri backdropUri = NetworkUtils.buildThumbnailUri(backdrop, BACKDROP_SIZE);
+            movieInfo.setBackdropUrl(backdropUri.toString());
 
             parseMovieData.add(movieInfo);
         }
@@ -63,8 +68,8 @@ public class MovieJsonUtils {
         return parseMovieData;
     }
 
-    public static List<Pair<String, String>> parseDetailJson(String detailJsonStr) throws JSONException {
-        List<Pair<String, String>> parseDetailData = new ArrayList<>();
+    public static List<VideoAndReview> parseDetailJson(String detailJsonStr) throws JSONException {
+        List<VideoAndReview> parseDetailData = new ArrayList<>();
         JSONObject detailJson = new JSONObject(detailJsonStr);
         JSONArray resultArray = detailJson.optJSONArray(JSON_RESULT);
 
@@ -77,14 +82,20 @@ public class MovieJsonUtils {
                 if (type.equals(VIDEO_TYPE_TRAILER)) {
                     String key = result.optString(VIDEO_KEY);
                     String name = result.optString(VIDEO_NAME);
+                    VideoAndReview video = new VideoAndReview();
 
-                    parseDetailData.add(Pair.create(key, name));
+                    video.setKey(key);
+                    video.setName(name);
+                    parseDetailData.add(video);
                 }
             } else {
                 String author = result.optString(REVIEW_AUTHOR);
                 String content = result.optString(REVIEW_CONTENT);
+                VideoAndReview review = new VideoAndReview();
 
-                parseDetailData.add(Pair.create(author, content));
+                review.setAuthor(author);
+                review.setContent(content);
+                parseDetailData.add(review);
             }
         }
 

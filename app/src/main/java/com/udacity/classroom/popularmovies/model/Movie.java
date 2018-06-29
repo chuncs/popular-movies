@@ -6,11 +6,12 @@ import android.os.Parcelable;
 public class Movie implements Parcelable{
     private String id;
     private String title;
-    private String thumbnail;
     private String synopsis;
     private String rating;
     private String release_date;
-    private String backdrop;
+    private String thumbnailUrl;
+    private String backdropUrl;
+    private String favorite;
 
     public Movie() {
     }
@@ -29,14 +30,6 @@ public class Movie implements Parcelable{
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
     }
 
     public String getSynopsis() {
@@ -63,12 +56,28 @@ public class Movie implements Parcelable{
         this.release_date = release_date;
     }
 
-    public String getBackdrop() {
-        return backdrop;
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
     }
 
-    public void setBackdrop(String backdrop) {
-        this.backdrop = backdrop;
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public String getBackdropUrl() {
+        return backdropUrl;
+    }
+
+    public void setBackdropUrl(String backdropUrl) {
+        this.backdropUrl = backdropUrl;
+    }
+
+    public String getFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(String favorite) {
+        this.favorite = favorite;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -77,11 +86,12 @@ public class Movie implements Parcelable{
     private Movie(Parcel parcel) {
         this.id = parcel.readString();
         this.title = parcel.readString();
-        this.thumbnail = parcel.readString();
         this.synopsis = parcel.readString();
         this.rating = parcel.readString();
         this.release_date = parcel.readString();
-        this.backdrop = parcel.readString();
+        this.thumbnailUrl = parcel.readString();
+        this.backdropUrl = parcel.readString();
+        this.favorite = parcel.readString();
     }
 
     public static final Parcelable.Creator<Movie> CREATOR
@@ -106,10 +116,11 @@ public class Movie implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(this.id);
         parcel.writeString(this.title);
-        parcel.writeString(this.thumbnail);
         parcel.writeString(this.synopsis);
         parcel.writeString(this.rating);
         parcel.writeString(this.release_date);
-        parcel.writeString(this.backdrop);
+        parcel.writeString(this.thumbnailUrl);
+        parcel.writeString(this.backdropUrl);
+        parcel.writeString(this.favorite);
     }
 }

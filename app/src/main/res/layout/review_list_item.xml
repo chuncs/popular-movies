@@ -2,52 +2,42 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-    
+
     <data>
         <variable
-            name="video"
+            name="review"
             type="com.udacity.classroom.popularmovies.model.VideoAndReview" />
-
-        <variable
-            name="vidClickListener"
-            type="android.view.View.OnClickListener" />
     </data>
 
     <android.support.v7.widget.CardView
-        style="?attr/cardViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:onClick="@{vidClickListener}"
-        android:tag="@{video.key}"
         app:cardCornerRadius="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/play_icon_iv"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                android:background="@android:color/holo_red_dark"
-                android:padding="8dp"
-                app:srcCompat="@android:drawable/ic_media_play" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/video_name_tv"
+                android:id="@+id/review_author_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:maxLines="2"
-                android:paddingEnd="8dp"
-                android:paddingStart="8dp"
-                android:text="@{video.name}"
+                android:padding="8dp"
+                android:text="@{review.author}"
                 tools:text="@sample/tools:lorem" />
+
+            <TextView
+                android:id="@+id/review_content_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="@{review.content}"
+                tools:text="@sample/tools:lorem/random" />
         </LinearLayout>
     </android.support.v7.widget.CardView>
 </layout>

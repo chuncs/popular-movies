@@ -1,4 +1,4 @@
-package com.udacity.classroom.popularmovies;
+package com.udacity.classroom.popularmovies.loader;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
@@ -12,7 +12,7 @@ public class MovieLoader extends AsyncTaskLoader<String> {
     private String mPath;
     private String mMovieData;
 
-    MovieLoader(Context context, String id, String path) {
+    public MovieLoader(Context context, String id, String path) {
         super(context);
         mId = id;
         mPath = path;

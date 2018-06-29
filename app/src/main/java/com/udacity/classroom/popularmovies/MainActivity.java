@@ -16,6 +16,8 @@ import android.view.View;
 
 import com.udacity.classroom.popularmovies.adapter.MovieAdapter;
 import com.udacity.classroom.popularmovies.databinding.ActivityMainBinding;
+import com.udacity.classroom.popularmovies.loader.FavoriteMovieLoader;
+import com.udacity.classroom.popularmovies.loader.MovieLoader;
 import com.udacity.classroom.popularmovies.model.Movie;
 import com.udacity.classroom.popularmovies.utilities.MovieJsonUtils;
 
@@ -24,16 +26,17 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         MovieAdapter.MovieAdapterOnClickHandler,
-        LoaderManager.LoaderCallbacks<String> {
+        LoaderManager.LoaderCallbacks {
     private static final String POPULAR = "popular";
     private static final String TOP_RATED = "top_rated";
     private static final String BUNDLE_KEY = MainActivity.class.getSimpleName();
     private static final int NUMBER_COLUMNS = 2;
     private static final int MOVIE_LOADER_ID = 23;
+    private static final int FAVORITE_LOADER_ID = 25;
     private static String mCurrentPath = POPULAR;
     private ArrayList<Movie> mMovie;
     private MovieAdapter mMovieAdapter;
-    ActivityMainBinding mBinding;
+    private ActivityMainBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,26 +68,43 @@ public class MainActivity extends AppCompatActivity implements
 
     @NonNull
     @Override
-    public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
+    public Loader onCreateLoader(int id, @Nullable Bundle args) {
         mBinding.loadingIndicatorPb.setVisibility(View.VISIBLE);
-        return new MovieLoader(this, null, mCurrentPath);
+
+        if (id == MOVIE_LOADER_ID) {
+            return new MovieLoader(this, null, mCurrentPath);
+        }
+
+        if (id == FAVORITE_LOADER_ID) {
+            return new FavoriteMovieLoader(this);
+        }
+
+        return null;
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<String> loader, String jsonMovieResponse) {
+    public void onLoadFinished(@NonNull Loader loader, Object data) {
         mBinding.loadingIndicatorPb.setVisibility(View.INVISIBLE);
-        List<Movie> jsonMovieData = null;
 
-        try {
-            jsonMovieData = MovieJsonUtils.parseMovieJson(jsonMovieResponse);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (loader.getId() == MOVIE_LOADER_ID) {
+            List<Movie> jsonMovieData = null;
+
+            try {
+                jsonMovieData = MovieJsonUtils.parseMovieJson((String) data);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            mMovie = (ArrayList<Movie>) jsonMovieData;
         }
 
-        mMovie = (ArrayList<Movie>) jsonMovieData;
-        mMovieAdapter.setMovieData(jsonMovieData);
+        if (loader.getId() == FAVORITE_LOADER_ID) {
+            mMovie = (ArrayList<Movie>) data;
+        }
 
-        if (jsonMovieData != null) {
+        mMovieAdapter.setMovieData(mMovie);
+
+        if (mMovie != null) {
             showMovieThumbnail();
         } else {
             showErrorMessage();
@@ -92,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLoaderReset(@NonNull Loader<String> loader) {
+    public void onLoaderReset(@NonNull Loader loader) {
 
     }
 
@@ -133,6 +153,11 @@ public class MainActivity extends AppCompatActivity implements
         if (id == R.id.top_rated) {
             mCurrentPath = TOP_RATED;
             getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
+            return true;
+        }
+
+        if (id == R.id.favorite) {
+            getSupportLoaderManager().restartLoader(FAVORITE_LOADER_ID, null, this);
             return true;
         }
 
